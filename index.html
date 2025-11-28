@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>헤아림 (Hearim) - Final</title>
+    <style>
+        /* ====================
+           1. 기본 설정 & 레이아웃
+           ==================== */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: #222; /* 앱 집중을 위해 어두운 배경 */
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; margin: 0; user-select: none; 
+        }
+        .app-container { 
+            width: 100%; max-width: 400px; height: 800px; 
+            background-color: white; border-radius: 20px; overflow: hidden; 
+            position: relative; display: flex; flex-direction: column; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        /* 화면 전환용 클래스 */
+        .screen { 
+            padding: 20px; flex: 1; display: none; 
+            flex-direction: column; overflow-y: auto; padding-bottom: 100px; 
+        }
+        .screen.active { display: flex; }
+
+        /* 텍스트 스타일 */
+        .hero-text { font-size: 24px; font-weight: 800; margin-top: 40px; margin-bottom: 10px; color: #333; word-break: keep-all; }
+        .sub-text { color: #666; margin-bottom: 30px; line-height: 1.5; }
+
+        /* 공통 버튼 */
+        .big-btn { 
+            background-color: #3182f6; color: white; border: none; padding: 18px; 
+            border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer; 
+            width: 100%; margin-top: auto; margin-bottom: 20px; 
+        }
+
+        /* ====================
+           2. 스플래시 (로딩) 화면
+           ==================== */
+        #splash-screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: white; z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 1.2s ease-in-out;
+        }
+        #splash-screen.show { opacity: 1; } 
+        
+        .logo-img { 
+            width: 140px; margin-bottom: 20px; 
+            animation: pulse-logo 2.5s infinite ease-in-out; 
+        }
+        .logo-text { 
+            font-size: 40px; font-weight: 900; color: #2ac1bc; 
+            letter-spacing: -1px; margin-top: 10px; 
+        }
+        @keyframes pulse-logo { 
+            0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } 
+        }
+
+        /* ====================
+           3. 커스텀 알림창 (Custom Alert)
+           ==================== */
+        .custom-alert-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6); z-index: 2000; /* 최상위 */
+            display: none; justify-content: center; align-items: center;
+        }
+        .custom-alert-box {
+            background: white; width: 80%; padding: 30px 20px; border-radius: 24px;
+            text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .alert-icon-circle {
+            width: 60px; height: 60px; background: #e8f9e9; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            margin: 0 auto 15px auto; color: #2e7d32; font-size: 30px;
+        }
+        .alert-title { font-size: 20px; font-weight: 800; color: #333; margin-bottom: 10px; }
+        .alert-desc { font-size: 15px; color: #666; margin-bottom: 25px; line-height: 1.4; }
+        .alert-btn {
+            background-color: #3182f6; color: white; border: none; padding: 15px;
+            border-radius: 12px; font-size: 16px; font-weight: bold; width: 100%; cursor: pointer;
+        }
+
+        /* ====================
+           4. 어르신 팝업
+           ==================== */
+        .senior-modal { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background-color: rgba(0,0,0,0.7); z-index: 1000; 
+            display: flex; justify-content: center; align-items: center; 
+        }
+        .modal-content { 
+            background-color: white; width: 85%; border-radius: 20px; 
+            padding: 30px 20px; text-align: center; 
+        }
+        .btn-yes { background-color: #2ac1bc; color: white; padding: 15px; width: 100%; border-radius: 12px; border: none; font-size: 20px; font-weight: bold; margin-bottom: 10px; cursor: pointer;}
+        .btn-no { background-color: #f2f4f6; color: #666; padding: 15px; width: 100%; border-radius: 12px; border: none; font-size: 16px; font-weight: bold; cursor: pointer;}
+
+        /* ====================
+           5. UI 컴포넌트 (카드, 입력창 등)
+           ==================== */
+        /* 역할 카드 */
+        .role-card { 
+            background: #fff; border: 2px solid #e5e8eb; border-radius: 20px; 
+            padding: 30px 20px; margin-bottom: 20px; text-align: center; 
+            cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; 
+        }
+        .role-card:hover { border-color: #3182f6; background-color: #f0f7ff; transform: translateY(-3px); }
+        .role-icon { font-size: 40px; margin-bottom: 10px; }
+        .role-title { font-size: 20px; font-weight: bold; margin-bottom: 5px; color: #333; }
+        .role-desc { font-size: 14px; color: #888; }
+
+        /* 입력 그룹 */
+        .input-group { margin-bottom: 20px; }
+        .input-label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; }
+        .input-field { width: 90%; padding: 15px; border: 2px solid #eee; border-radius: 12px; font-size: 16px; outline: none; transition: 0.3s; }
+        .input-field:focus { border-color: #3182f6; }
+
+        /* 혜택 카드 */
+        .benefit-card { 
+            background: #fff; border: 2px solid #e5e8eb; border-radius: 16px; 
+            padding: 20px; margin-bottom: 15px; display: flex; align-items: center; 
+            cursor: pointer; transition: 0.3s; 
+        }
+        .benefit-card.selected { border-color: #3182f6; background-color: #f0f7ff; transform: scale(1.02); }
+        .checkbox { 
+            width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ccc; 
+            margin-right: 15px; display: flex; align-items: center; justify-content: center; 
+            color: transparent; background: white; transition: 0.2s; 
+        }
+        .benefit-card.selected .checkbox { border-color: #3182f6; background-color: #3182f6; color: white; }
+        .info { flex: 1; }
+        .b-title { font-weight: bold; font-size: 16px; margin-bottom: 4px; }
+        .b-desc { font-size: 13px; color: #888; }
+        .tag { font-size: 11px; background: #eee; padding: 3px 6px; border-radius: 4px; color: #555; }
+        .tag.red { background: #ffebee; color: #d32f2f; font-weight: bold; }
+
+        /* 서류 제출 옵션 카드 */
+        .option-card { border: 2px solid #eee; border-radius: 16px; padding: 20px; margin-bottom: 15px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .option-card:hover { border-color: #3182f6; background-color: #f9fcff; }
+        .option-card.auto { background-color: #f0f7ff; border-color: #3182f6; }
+        .option-card.auto .opt-title { color: #3182f6; }
+        .opt-icon { font-size: 30px; margin-bottom: 10px; display: block; }
+        .opt-title { font-weight: bold; font-size: 18px; margin-bottom: 5px; }
+        .opt-desc { font-size: 13px; color: #666; }
+
+        /* ====================
+           6. 하단 바 (Manual & Voice)
+           ==================== */
+        .manual-bar { 
+            position: absolute; bottom: 0; left: 0; width: 100%; background: white; 
+            padding: 20px; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); box-sizing: border-box; 
+            display: flex; justify-content: space-between; align-items: center; z-index: 50; 
+        }
+        .manual-btn { background: #333; color: white; border: none; padding: 15px 25px; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; }
+
+        .voice-bar { 
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 300px; 
+            background: white; border-top-left-radius: 25px; border-top-right-radius: 25px; 
+            box-shadow: 0 -5px 30px rgba(0,0,0,0.2); z-index: 100; 
+            display: none; flex-direction: column; align-items: center; padding-top: 20px; 
+            border-top: 5px solid #2ac1bc; transition: transform 0.3s ease-out; transform: translateY(100%); 
+        }
+        .voice-bar.active { display: flex; transform: translateY(0); }
+        
+        .voice-transcript { 
+            font-size: 20px; color: #333; font-weight: 800; margin-bottom: 15px; 
+            text-align: center; padding: 0 20px; height: 60px; 
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        /* 음성 파형 애니메이션 */
+        .wave-container { display: flex; height: 40px; align-items: center; margin-bottom: 15px; }
+        .bar { width: 6px; background: #2ac1bc; margin: 0 4px; border-radius: 3px; animation: sound 1s infinite ease-in-out; }
+        .bar:nth-child(1) { height: 15px; animation-delay: 0.1s; } 
+        .bar:nth-child(2) { height: 30px; animation-delay: 0.2s; } 
+        .bar:nth-child(3) { height: 40px; animation-delay: 0.3s; }
+        @keyframes sound { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.8); } }
+
+        /* 로딩 오버레이 */
+        .loading-overlay { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(255,255,255,0.95); display: none; 
+            justify-content: center; align-items: center; flex-direction: column; 
+            z-index: 1500; text-align: center; 
+        }
+        .doc-icon { font-size: 50px; margin-bottom: 15px; display: block; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <div id="splash-screen">
+        <img src="https://i.imgur.com/sdSwmX3.png" alt="헤아림 로고" class="logo-img">
+        <div class="logo-text">헤아림</div>
+    </div>
+
+    <div id="custom-alert" class="custom-alert-overlay">
+        <div class="custom-alert-box">
+            <div class="alert-icon-circle">✅</div>
+            <div class="alert-title" id="alert-title">승인 완료</div>
+            <div class="alert-desc" id="alert-desc">가족의 동의를 받았습니다.</div>
+            <button class="alert-btn" onclick="closeCustomAlert()">확인</button>
+        </div>
+    </div>
+
+    <div id="senior-modal" class="senior-modal" style="display:none;">
+        <div class="modal-content">
+            <div style="font-size: 22px; font-weight: bold; margin-bottom: 20px;">
+                글자가 작아서<br>불편하시면 통화로 할까요?
+            </div>
+            <button class="btn-yes" onclick="startVoiceMode()">네, 통화로 할게요</button>
+            <button class="btn-no" onclick="closeModal()">아니요, 괜찮습니다</button>
+        </div>
+    </div>
+
+    <div id="screen-role" class="screen">
+        <div class="hero-text">안녕하세요.<br>누구의 지원금을<br>찾으시나요?</div>
+        
+        <div class="role-card" onclick="selectRole('me')">
+            <span class="role-icon">🙋‍♂️</span>
+            <div class="role-title">내 지원금 찾기</div>
+            <div class="role-desc">김민준(본인) 신청</div>
+        </div>
+        <div class="role-card" onclick="selectRole('family')">
+            <span class="role-icon">👪</span>
+            <div class="role-title">가족 대신 신청하기</div>
+            <div class="role-desc">부모님, 조부모님 대리 신청</div>
+        </div>
+    </div>
+
+    <div id="screen-family-auth" class="screen">
+        <div class="hero-text">가족의 동의가<br>필요합니다.</div>
+        <div class="sub-text">카카오톡으로 대리 신청 권한<br>요청 메시지를 보냅니다.</div>
+
+        <div class="input-group">
+            <span class="input-label">가족 이름</span>
+            <input type="text" id="family-name" class="input-field" placeholder="예: 김영희" value="김영희">
+        </div>
+        <div class="input-group">
+            <span class="input-label">휴대폰 번호</span>
+            <input type="tel" class="input-field" placeholder="010-0000-0000" value="010-1234-5678">
+        </div>
+        <button class="big-btn" onclick="requestFamilyConsent()">동의 요청 보내기</button>
+    </div>
+
+    <div id="screen-list" class="screen">
+        <div class="hero-text" id="list-header-text">김민준님,<br>무엇을 도와드릴까요?</div>
+        
+        <div class="benefit-card" id="card-1" onclick="toggleCard(this)">
+            <div class="checkbox">✔</div>
+            <div class="info"><div class="b-title">병원비(의료비) 지원</div><div class="b-desc">연 최대 100만원</div></div>
+        </div>
+        <div class="benefit-card" id="card-2" onclick="toggleCard(this)">
+            <div class="checkbox">✔</div>
+            <div class="info"><div class="b-title">난방비 바우처</div><div class="b-desc">겨울철 20만원</div></div>
+        </div>
+        <div class="benefit-card" id="card-3" onclick="toggleCard(this)" data-need-file="true">
+            <div class="checkbox">✔</div>
+            <div class="info">
+                <div class="b-title">가족 돌봄(영케어러) 지원</div>
+                <div class="b-desc">연 200만원 <span class="tag red">서류 필수</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="manual-bar" class="manual-bar" style="display:none;">
+        <div style="font-size:14px; color:#666;">선택한 혜택을 신청합니다</div>
+        <button class="manual-btn" onclick="checkFlow()">신청하기 ></button>
+    </div>
+
+    <div id="voice-bar" class="voice-bar">
+        <div style="font-size:14px; color:#2ac1bc; font-weight:bold; margin-bottom:5px;">AI 비서가 듣고 있습니다</div>
+        <div class="wave-container"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+        <div class="voice-transcript" id="transcript">"필요한 걸 말씀해 주세요"</div>
+        <button id="voice-submit-btn" class="manual-btn" style="width:90%; display:none; background:#2ac1bc;" onclick="checkFlow()">네, 신청해 주세요</button>
+    </div>
+
+    <div id="screen-input" class="screen">
+        <div class="hero-text">잠깐! 서류가<br>필요해요.</div>
+        <div class="sub-text">가족관계증명서를 제출해야 합니다.<br>편한 방법을 선택하세요.</div>
+
+        <div class="option-card auto" onclick="processDoc('auto')">
+            <span class="opt-icon">⚡</span>
+            <div class="opt-title">자동으로 가져오기</div>
+            <div class="opt-desc">정부24에서 즉시 발급 (추천)</div>
+        </div>
+        <div class="option-card" onclick="processDoc('camera')">
+            <span class="opt-icon">📷</span>
+            <div class="opt-title">직접 촬영하기</div>
+            <div class="opt-desc">종이 서류를 사진으로 찍기</div>
+        </div>
+    </div>
+
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="doc-icon">⏳</div>
+        <h2 style="margin-bottom:10px;" id="loading-text">처리 중...</h2>
+        <p id="loading-desc">잠시만 기다려 주세요.</p>
+    </div>
+
+    <div id="screen-success" class="screen" style="text-align:center; justify-content:center;">
+        <div style="font-size:60px;">🎉</div>
+        <div class="hero-text" style="margin-top:20px;">신청 완료!</div>
+        <div class="sub-text">모든 절차가 끝났습니다.<br>결과는 카톡으로 알려드릴게요.</div>
+        <button class="big-btn" onclick="location.reload()">처음으로</button>
+    </div>
+
+</div>
+
+<script>
+    // --- 1. 앱 초기 실행 (스플래시 -> 어르신 팝업) ---
+    window.onload = function() {
+        const splash = document.getElementById('splash-screen');
+        const seniorModal = document.getElementById('senior-modal');
+
+        // 페이드 인
+        setTimeout(() => { splash.classList.add('show'); }, 100);
+        // 페이드 아웃
+        setTimeout(() => { splash.classList.remove('show'); }, 2500);
+        // 모달 띄우기
+        setTimeout(() => { splash.style.display = 'none'; seniorModal.style.display = 'flex'; }, 3700);
+    }
+
+    // --- 2. 커스텀 알림창 로직 ---
+    let pendingFamilyName = "";
+
+    function showCustomAlert(title, desc, familyName) {
+        document.getElementById('alert-title').innerText = title;
+        document.getElementById('alert-desc').innerHTML = desc;
+        document.getElementById('custom-alert').style.display = 'flex';
+        pendingFamilyName = familyName;
+    }
+
+    function closeCustomAlert() {
+        document.getElementById('custom-alert').style.display = 'none';
+        
+        // 알림창 닫으면 리스트 화면으로 이동 + 이름 반영
+        if(pendingFamilyName) {
+            document.getElementById('list-header-text').innerHTML = pendingFamilyName + "님을 위해<br>무엇을 신청할까요?";
+            showScreen('screen-list');
+            document.getElementById('manual-bar').style.display = 'flex';
+        }
+    }
+
+    // --- 3. 어르신 음성 모드 ---
+    function startVoiceMode() {
+        document.getElementById('senior-modal').style.display = 'none';
+        document.getElementById('list-header-text').innerHTML = "김철수님,<br>무엇을 도와드릴까요?";
+        showScreen('screen-list');
+        document.getElementById('voice-bar').classList.add('active');
+        simulateConversation();
+    }
+    function closeModal() {
+        document.getElementById('senior-modal').style.display = 'none';
+        showScreen('screen-role');
+    }
+
+    // --- 4. 역할 선택 & 위임 프로세스 ---
+    function selectRole(type) {
+        if(type === 'me') {
+            document.getElementById('list-header-text').innerHTML = "김민준님,<br>무엇을 도와드릴까요?";
+            showScreen('screen-list');
+            document.getElementById('manual-bar').style.display = 'flex';
+        } else {
+            showScreen('screen-family-auth');
+        }
+    }
+
+    function requestFamilyConsent() {
+        const familyName = document.getElementById('family-name').value;
+        showLoading("카카오톡 전송 중...", familyName + "님께 동의 요청을 보냈습니다.");
+        
+        setTimeout(() => {
+            hideLoading();
+            // 커스텀 알림창 호출
+            showCustomAlert(
+                "승인 완료", 
+                "✅ <b>" + familyName + "</b>님이 대리 신청을<br>승인하셨습니다.", 
+                familyName
+            );
+        }, 2000);
+    }
+
+    // --- 5. 음성 시뮬레이션 ---
+    function toggleCard(card) { card.classList.toggle('selected'); }
+    function simulateConversation() {
+        const transcript = document.getElementById('transcript');
+        setTimeout(() => { transcript.innerText = "\"허리가 아파서 병원비가...\""; }, 1500);
+        setTimeout(() => { 
+            transcript.innerText = "의료비 지원을 찾았습니다."; transcript.style.color = "#2ac1bc";
+            selectCardById('card-1');
+        }, 3000);
+        setTimeout(() => { transcript.innerText = "\"할머니 돌보는 서류도...\""; transcript.style.color = "#333"; }, 4500);
+        setTimeout(() => { 
+            transcript.innerText = "가족 돌봄 지원도 체크할게요."; transcript.style.color = "#2ac1bc";
+            selectCardById('card-3');
+        }, 6000);
+        setTimeout(() => { 
+            document.querySelector('.wave-container').style.display = 'none';
+            transcript.innerText = "이렇게 2건 신청할까요?";
+            document.getElementById('voice-submit-btn').style.display = 'block';
+        }, 7500);
+    }
+    function selectCardById(id) {
+        const card = document.getElementById(id);
+        if(!card.classList.contains('selected')) {
+            card.classList.add('selected');
+            card.scrollIntoView({behavior: "smooth", block: "center"});
+        }
+    }
+
+    // --- 6. 흐름 제어 ---
+    function checkFlow() {
+        const selectedCards = document.querySelectorAll('.benefit-card.selected');
+        let needFile = false;
+        selectedCards.forEach(card => { if(card.getAttribute('data-need-file') === 'true') needFile = true; });
+        document.getElementById('voice-bar').classList.remove('active');
+        if(needFile) { showScreen('screen-input'); } 
+        else { showScreen('screen-success'); }
+    }
+
+    // --- 7. 서류 제출 ---
+    function processDoc(type) {
+        if(type === 'auto') { showLoading("서류 발급 중...", "행정안전부 서버에서 가져오고 있습니다."); }
+        else { showLoading("카메라 구동 중...", "사진을 촬영하고 있습니다."); }
+        setTimeout(() => { hideLoading(); showScreen('screen-success'); }, 2000);
+    }
+
+    // --- 8. 유틸리티 ---
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(id === 'screen-list' && !document.getElementById('voice-bar').classList.contains('active')) {
+             document.getElementById('manual-bar').style.display = 'flex';
+        } else { document.getElementById('manual-bar').style.display = 'none'; }
+    }
+    function showLoading(title, desc) {
+        document.getElementById('loading-text').innerText = title;
+        document.getElementById('loading-desc').innerText = desc;
+        document.getElementById('loading-overlay').style.display = 'flex';
+    }
+    function hideLoading() { document.getElementById('loading-overlay').style.display = 'none'; }
+</script>
+
+</body>
+</html>
