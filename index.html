@@ -3,45 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>헤아림 (Final Fixed)</title>
+    <title>헤아림 (Rounded Design)</title>
     <style>
         /* ====================
-           1. 반응형 레이아웃 설정
+           1. 반응형 레이아웃 (둥근 모서리 유지)
            ==================== */
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            background-color: #f2f4f6; 
+            background-color: #222; /* 배경을 어둡게 해서 앱이 더 잘 보이게 */
             display: flex; justify-content: center; align-items: center; 
             min-height: 100vh; margin: 0; user-select: none; 
         }
 
         .app-container { 
-            width: 100%; height: 100vh; 
-            background-color: white; position: relative; 
+            width: 100%; 
+            height: 100vh; 
+            background-color: white; 
+            position: relative; 
             display: flex; flex-direction: column; 
-            max-width: 480px; box-shadow: 0 0 20px rgba(0,0,0,0.1); 
+            
+            /* ★ 핵심 수정: 모서리를 항상 둥글게 유지 ★ */
+            max-width: 480px; 
+            max-height: 850px; /* 너무 길어지지 않게 */
+            border-radius: 35px; /* 둥근 정도 (아이폰 스타일) */
+            overflow: hidden; /* 둥근 모서리 밖으로 내용이 나가지 않게 */
+            
+            /* 그림자 효과로 입체감 주기 */
+            box-shadow: 0 0 30px rgba(0,0,0,0.5); 
         }
 
+        /* 모바일 화면 대응 */
         @media (max-width: 480px) {
-            body { background-color: white; }
-            .app-container { max-width: 100%; border-radius: 0; box-shadow: none; }
+            body { 
+                background-color: #f2f4f6; /* 모바일 배경색 */
+                align-items: flex-start; /* 위쪽 정렬 */
+            }
+            .app-container {
+                max-width: 100%;
+                height: 100vh;
+                max-height: none; /* 높이 제한 해제 */
+                border-radius: 0; /* 모바일 전체 화면에서는 꽉 차게 (선택사항) */
+            }
+            
+            /* ★ 사용자가 원한 '둥근 모서리'를 모바일에서도 강제 적용하려면 아래 주석을 푸세요 ★ */
+            /* .app-container {
+                margin: 10px;
+                height: calc(100vh - 20px);
+                border-radius: 25px;
+                box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            }
+            */
+        }
+        
+        /* 이번에는 요청하신 대로 모바일/PC 상관없이 항상 둥글게 강제 적용합니다 */
+        @media (max-width: 480px) {
+            .app-container {
+                border-radius: 30px !important; /* 강제 적용 */
+                margin: 0; /* 꽉 차게 */
+                /* 만약 화면 테두리와 떨어지게 하려면 margin: 10px; height: 95vh; 로 바꾸세요 */
+            }
         }
 
         /* 화면 전환용 클래스 */
         .screen { 
             padding: 20px; flex: 1; display: none; 
             flex-direction: column; overflow-y: auto; padding-bottom: 100px; 
+            
+            /* 스크롤바 숨기기 */
+            scrollbar-width: none; 
+            -ms-overflow-style: none;
         }
+        .screen::-webkit-scrollbar { display: none; }
         .screen.active { display: flex; }
 
         /* 텍스트 & 버튼 */
-        .hero-text { font-size: 24px; font-weight: 800; margin-top: 40px; margin-bottom: 10px; color: #333; word-break: keep-all; }
-        .sub-text { color: #666; margin-bottom: 30px; line-height: 1.5; }
+        .hero-text { font-size: 26px; font-weight: 800; margin-top: 50px; margin-bottom: 10px; color: #333; word-break: keep-all; letter-spacing: -0.5px; }
+        .sub-text { color: #666; margin-bottom: 30px; line-height: 1.5; font-size: 15px; }
         .big-btn { 
             background-color: #3182f6; color: white; border: none; padding: 18px; 
-            border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer; 
+            border-radius: 18px; font-size: 18px; font-weight: bold; cursor: pointer; 
             width: 100%; margin-top: auto; margin-bottom: 20px; 
+            box-shadow: 0 4px 10px rgba(49, 130, 246, 0.3); /* 버튼 그림자 추가 */
+            transition: transform 0.1s;
         }
+        .big-btn:active { transform: scale(0.98); }
 
         /* ====================
            2. 스플래시 (로딩) 화면
@@ -57,9 +102,9 @@
         .logo-img { 
             width: 120px; height: 120px; object-fit: contain; margin-bottom: 20px; 
             animation: pulse-logo 2.5s infinite ease-in-out; 
-            filter: drop-shadow(0 5px 10px rgba(42, 193, 188, 0.3));
+            filter: drop-shadow(0 10px 20px rgba(42, 193, 188, 0.3)); /* 그림자 강화 */
         }
-        .logo-text { font-size: 40px; font-weight: 900; color: #2ac1bc; letter-spacing: -1px; margin-top: 5px; }
+        .logo-text { font-size: 40px; font-weight: 900; color: #2ac1bc; letter-spacing: -2px; margin-top: 5px; }
         @keyframes pulse-logo { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
         /* ====================
@@ -68,18 +113,19 @@
         .custom-alert-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.6); z-index: 2000;
+            backdrop-filter: blur(5px); /* 배경 블러 효과 추가 */
             display: none; justify-content: center; align-items: center;
         }
         .custom-alert-box {
-            background: white; width: 80%; padding: 30px 20px; border-radius: 24px;
-            text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            background: white; width: 80%; padding: 30px 20px; border-radius: 30px;
+            text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
             animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .alert-icon-circle { width: 60px; height: 60px; background: #e8f9e9; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 15px auto; color: #2e7d32; font-size: 30px; }
-        .alert-title { font-size: 20px; font-weight: 800; color: #333; margin-bottom: 10px; }
-        .alert-desc { font-size: 15px; color: #666; margin-bottom: 25px; line-height: 1.4; }
-        .alert-btn { background-color: #3182f6; color: white; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: bold; width: 100%; cursor: pointer; }
+        .alert-title { font-size: 22px; font-weight: 800; color: #333; margin-bottom: 10px; }
+        .alert-desc { font-size: 16px; color: #666; margin-bottom: 25px; line-height: 1.4; }
+        .alert-btn { background-color: #3182f6; color: white; border: none; padding: 16px; border-radius: 15px; font-size: 17px; font-weight: bold; width: 100%; cursor: pointer; }
 
         /* ====================
            4. 어르신 팝업 & UI 요소
@@ -87,60 +133,61 @@
         .senior-modal { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             background-color: rgba(0,0,0,0.7); z-index: 1000; 
+            backdrop-filter: blur(5px);
             display: flex; justify-content: center; align-items: center; 
         }
-        .modal-content { background-color: white; width: 85%; border-radius: 20px; padding: 30px 20px; text-align: center; }
-        .btn-yes { background-color: #2ac1bc; color: white; padding: 15px; width: 100%; border-radius: 12px; border: none; font-size: 20px; font-weight: bold; margin-bottom: 10px; cursor: pointer;}
-        .btn-no { background-color: #f2f4f6; color: #666; padding: 15px; width: 100%; border-radius: 12px; border: none; font-size: 16px; font-weight: bold; cursor: pointer;}
+        .modal-content { background-color: white; width: 85%; border-radius: 30px; padding: 40px 25px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+        .btn-yes { background-color: #2ac1bc; color: white; padding: 20px; width: 100%; border-radius: 20px; border: none; font-size: 22px; font-weight: 800; margin-bottom: 15px; cursor: pointer; box-shadow: 0 5px 15px rgba(42, 193, 188, 0.4); }
+        .btn-no { background-color: #f5f5f5; color: #888; padding: 15px; width: 100%; border-radius: 15px; border: none; font-size: 18px; font-weight: bold; cursor: pointer; }
 
-        .role-card { background: #fff; border: 2px solid #e5e8eb; border-radius: 20px; padding: 30px 20px; margin-bottom: 20px; text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; }
-        .role-card:hover { border-color: #3182f6; background-color: #f0f7ff; transform: translateY(-3px); }
-        .role-icon { font-size: 40px; margin-bottom: 10px; }
-        .role-title { font-size: 20px; font-weight: bold; margin-bottom: 5px; color: #333; }
-        .role-desc { font-size: 14px; color: #888; }
+        .role-card { background: #fff; border: 2px solid #f0f2f5; border-radius: 25px; padding: 35px 20px; margin-bottom: 20px; text-align: center; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; }
+        .role-card:hover { border-color: #3182f6; background-color: #f7fbff; transform: translateY(-5px); box-shadow: 0 10px 20px rgba(49, 130, 246, 0.1); }
+        .role-icon { font-size: 45px; margin-bottom: 15px; }
+        .role-title { font-size: 22px; font-weight: bold; margin-bottom: 5px; color: #333; }
+        .role-desc { font-size: 15px; color: #888; }
 
-        .input-group { margin-bottom: 20px; }
-        .input-label { display: block; font-weight: bold; margin-bottom: 8px; color: #333; }
-        .input-field { width: 90%; padding: 15px; border: 2px solid #eee; border-radius: 12px; font-size: 16px; outline: none; transition: 0.3s; }
-        .input-field:focus { border-color: #3182f6; }
+        .input-group { margin-bottom: 25px; }
+        .input-label { display: block; font-weight: bold; margin-bottom: 10px; color: #333; font-size: 16px; }
+        .input-field { width: 90%; padding: 18px; border: 2px solid #f0f2f5; border-radius: 15px; font-size: 18px; outline: none; transition: 0.3s; background: #f9f9f9; }
+        .input-field:focus { border-color: #3182f6; background: white; }
 
-        .benefit-card { background: #fff; border: 2px solid #e5e8eb; border-radius: 16px; padding: 20px; margin-bottom: 15px; display: flex; align-items: center; cursor: pointer; transition: 0.3s; }
-        .benefit-card.selected { border-color: #3182f6; background-color: #f0f7ff; transform: scale(1.02); }
-        .checkbox { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ccc; margin-right: 15px; display: flex; align-items: center; justify-content: center; color: transparent; background: white; transition: 0.2s; }
+        .benefit-card { background: #fff; border: 2px solid #f0f2f5; border-radius: 20px; padding: 25px; margin-bottom: 15px; display: flex; align-items: center; cursor: pointer; transition: 0.3s; }
+        .benefit-card.selected { border-color: #3182f6; background-color: #f7fbff; transform: scale(1.02); box-shadow: 0 10px 20px rgba(49, 130, 246, 0.1); }
+        .checkbox { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #ddd; margin-right: 18px; display: flex; align-items: center; justify-content: center; color: transparent; background: white; transition: 0.2s; }
         .benefit-card.selected .checkbox { border-color: #3182f6; background-color: #3182f6; color: white; }
         .info { flex: 1; }
-        .b-title { font-weight: bold; font-size: 16px; margin-bottom: 4px; }
-        .b-desc { font-size: 13px; color: #888; }
-        .tag { font-size: 11px; background: #eee; padding: 3px 6px; border-radius: 4px; color: #555; }
-        .tag.red { background: #ffebee; color: #d32f2f; font-weight: bold; }
+        .b-title { font-weight: bold; font-size: 18px; margin-bottom: 5px; }
+        .b-desc { font-size: 14px; color: #888; }
+        .tag { font-size: 12px; background: #eee; padding: 4px 8px; border-radius: 6px; color: #555; }
+        .tag.red { background: #fff0f0; color: #f44336; font-weight: bold; }
 
-        .option-card { border: 2px solid #eee; border-radius: 16px; padding: 20px; margin-bottom: 15px; text-align: center; cursor: pointer; transition: 0.2s; }
-        .option-card:hover { border-color: #3182f6; background-color: #f9fcff; }
+        .option-card { border: 2px solid #f0f2f5; border-radius: 20px; padding: 25px; margin-bottom: 15px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .option-card:hover { border-color: #3182f6; background-color: #f7fbff; }
         .option-card.auto { background-color: #f0f7ff; border-color: #3182f6; }
         .option-card.auto .opt-title { color: #3182f6; }
-        .opt-icon { font-size: 30px; margin-bottom: 10px; display: block; }
-        .opt-title { font-weight: bold; font-size: 18px; margin-bottom: 5px; }
-        .opt-desc { font-size: 13px; color: #666; }
+        .opt-icon { font-size: 35px; margin-bottom: 12px; display: block; }
+        .opt-title { font-weight: bold; font-size: 19px; margin-bottom: 5px; }
+        .opt-desc { font-size: 14px; color: #666; }
 
         /* ====================
            5. 하단 바 (Manual & Voice)
            ==================== */
-        .manual-bar { position: absolute; bottom: 0; left: 0; width: 100%; background: white; padding: 20px; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; z-index: 50; }
-        .manual-btn { background: #333; color: white; border: none; padding: 15px 25px; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .manual-bar { position: absolute; bottom: 0; left: 0; width: 100%; background: white; padding: 25px 20px; box-shadow: 0 -5px 30px rgba(0,0,0,0.1); box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; z-index: 50; border-radius: 30px 30px 0 0; }
+        .manual-btn { background: #333; color: white; border: none; padding: 15px 30px; border-radius: 15px; font-weight: bold; font-size: 17px; cursor: pointer; }
 
-        .voice-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 300px; background: white; border-top-left-radius: 25px; border-top-right-radius: 25px; box-shadow: 0 -5px 30px rgba(0,0,0,0.2); z-index: 100; display: none; flex-direction: column; align-items: center; padding-top: 20px; border-top: 5px solid #2ac1bc; transition: transform 0.3s ease-out; transform: translateY(100%); }
+        .voice-bar { position: absolute; bottom: 0; left: 0; width: 100%; height: 320px; background: white; border-top-left-radius: 35px; border-top-right-radius: 35px; box-shadow: 0 -5px 40px rgba(0,0,0,0.2); z-index: 100; display: none; flex-direction: column; align-items: center; padding-top: 30px; border-top: 6px solid #2ac1bc; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: translateY(100%); }
         .voice-bar.active { display: flex; transform: translateY(0); }
-        .voice-transcript { font-size: 20px; color: #333; font-weight: 800; margin-bottom: 15px; text-align: center; padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: center;}
+        .voice-transcript { font-size: 22px; color: #333; font-weight: 800; margin-bottom: 20px; text-align: center; padding: 0 20px; height: 70px; display: flex; align-items: center; justify-content: center; line-height: 1.3; }
         
-        .wave-container { display: flex; height: 40px; align-items: center; margin-bottom: 15px; }
-        .bar { width: 6px; background: #2ac1bc; margin: 0 4px; border-radius: 3px; animation: sound 1s infinite ease-in-out; }
-        .bar:nth-child(1) { height: 15px; animation-delay: 0.1s; } 
-        .bar:nth-child(2) { height: 30px; animation-delay: 0.2s; } 
-        .bar:nth-child(3) { height: 40px; animation-delay: 0.3s; }
+        .wave-container { display: flex; height: 50px; align-items: center; margin-bottom: 20px; }
+        .bar { width: 8px; background: #2ac1bc; margin: 0 5px; border-radius: 4px; animation: sound 1s infinite ease-in-out; }
+        .bar:nth-child(1) { height: 20px; animation-delay: 0.1s; } 
+        .bar:nth-child(2) { height: 40px; animation-delay: 0.2s; } 
+        .bar:nth-child(3) { height: 50px; animation-delay: 0.3s; }
         @keyframes sound { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.8); } }
 
-        .loading-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 1500; text-align: center; }
-        .doc-icon { font-size: 50px; margin-bottom: 15px; display: block; }
+        .loading-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 1500; text-align: center; backdrop-filter: blur(5px); }
+        .doc-icon { font-size: 60px; margin-bottom: 20px; display: block; }
     </style>
 </head>
 <body>
@@ -163,8 +210,8 @@
 
     <div id="senior-modal" class="senior-modal" style="display:none;">
         <div class="modal-content">
-            <div style="font-size: 22px; font-weight: bold; margin-bottom: 20px;">
-                글자가 작아서<br>불편하시면 통화로 할까요?
+            <div style="font-size: 24px; font-weight: 800; margin-bottom: 25px; line-height: 1.4;">
+                글자가 작아서<br>불편하시면<br><span style="color:#2ac1bc">통화로 할까요?</span>
             </div>
             <button class="btn-yes" onclick="startVoiceMode()">네, 통화로 할게요</button>
             <button class="btn-no" onclick="closeModal()">아니요, 괜찮습니다</button>
@@ -222,12 +269,12 @@
     </div>
 
     <div id="manual-bar" class="manual-bar" style="display:none;">
-        <div style="font-size:14px; color:#666;">선택한 혜택을 신청합니다</div>
+        <div style="font-size:15px; color:#666; font-weight:bold;">선택한 혜택을 신청합니다</div>
         <button class="manual-btn" onclick="checkFlow()">신청하기 ></button>
     </div>
 
     <div id="voice-bar" class="voice-bar">
-        <div style="font-size:14px; color:#2ac1bc; font-weight:bold; margin-bottom:5px;">AI 비서가 듣고 있습니다</div>
+        <div style="font-size:15px; color:#2ac1bc; font-weight:bold; margin-bottom:10px;">AI 비서가 듣고 있습니다</div>
         <div class="wave-container"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
         <div class="voice-transcript" id="transcript">"필요한 걸 말씀해 주세요"</div>
         <button id="voice-submit-btn" class="manual-btn" style="width:90%; display:none; background:#2ac1bc;" onclick="checkFlow()">네, 신청해 주세요</button>
@@ -256,64 +303,50 @@
     </div>
 
     <div id="screen-success" class="screen" style="text-align:center; justify-content:center;">
-        <div style="font-size:60px;">🎉</div>
-        <div class="hero-text" style="margin-top:20px;">신청 완료!</div>
+        <div style="font-size:70px; margin-bottom:20px;">🎉</div>
+        <div class="hero-text" style="margin-top:0;">신청 완료!</div>
         <div class="sub-text">모든 절차가 끝났습니다.<br>결과는 카톡으로 알려드릴게요.</div>
-        <button class="big-btn" onclick="resetApp()">처음으로</button>
+        <button class="big-btn" onclick="resetApp()">처음으로 돌아가기</button>
     </div>
 
 </div>
 
 <script>
-    // --- 1. 앱 초기 실행 (스플래시 -> 어르신 팝업) ---
+    // --- 1. 앱 초기 실행 ---
     window.onload = function() {
         const splash = document.getElementById('splash-screen');
         const seniorModal = document.getElementById('senior-modal');
 
-        // 페이드 인
         setTimeout(() => { splash.classList.add('show'); }, 100);
-        // 페이드 아웃
         setTimeout(() => { splash.classList.remove('show'); }, 2500);
-        // 모달 띄우기
         setTimeout(() => { splash.style.display = 'none'; seniorModal.style.display = 'flex'; }, 3700);
     }
 
-    // --- ★ NEW: 앱 리셋 함수 (새로고침 없이 초기화) ★ ---
+    // --- 앱 리셋 (새로고침 없이) ---
     function resetApp() {
-        // 1. 모든 화면 숨기기
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-        
-        // 2. 오버레이 및 하단 바 숨기기/초기화
         document.getElementById('voice-bar').classList.remove('active');
         document.getElementById('manual-bar').style.display = 'none';
         document.getElementById('custom-alert').style.display = 'none';
-        
-        // 3. 변수 및 텍스트 초기화
         pendingFamilyName = "";
-        document.getElementById('list-header-text').innerHTML = "김민준님,<br>무엇을 도와드릴까요?"; // 기본값 복구
-        
-        // 4. 선택된 카드들 초기화 (체크 해제)
+        document.getElementById('list-header-text').innerHTML = "김민준님,<br>무엇을 도와드릴까요?";
         document.querySelectorAll('.benefit-card').forEach(c => c.classList.remove('selected'));
-
-        // ★ 5. 로고 화면은 숨김 유지, 어르신 팝업만 다시 띄우기 ★
-        document.getElementById('splash-screen').style.display = 'none'; 
+        
+        // 로고 로딩 없이 바로 어르신 팝업 띄우기
+        document.getElementById('splash-screen').style.display = 'none';
         document.getElementById('senior-modal').style.display = 'flex';
     }
 
-    // --- 2. 커스텀 알림창 로직 ---
+    // --- 2. 알림창 ---
     let pendingFamilyName = "";
-
     function showCustomAlert(title, desc, familyName) {
         document.getElementById('alert-title').innerText = title;
         document.getElementById('alert-desc').innerHTML = desc;
         document.getElementById('custom-alert').style.display = 'flex';
         pendingFamilyName = familyName;
     }
-
     function closeCustomAlert() {
         document.getElementById('custom-alert').style.display = 'none';
-        
-        // 알림창 닫으면 리스트 화면으로 이동 + 이름 반영
         if(pendingFamilyName) {
             document.getElementById('list-header-text').innerHTML = pendingFamilyName + "님을 위해<br>무엇을 신청할까요?";
             showScreen('screen-list');
@@ -324,7 +357,6 @@
     // --- 3. 어르신 음성 모드 ---
     function startVoiceMode() {
         document.getElementById('senior-modal').style.display = 'none';
-        // 음성 모드 시 기본 이름(김철수 - 어르신 예시)으로 설정
         document.getElementById('list-header-text').innerHTML = "김철수님,<br>무엇을 도와드릴까요?";
         showScreen('screen-list');
         document.getElementById('voice-bar').classList.add('active');
@@ -335,7 +367,7 @@
         showScreen('screen-role');
     }
 
-    // --- 4. 역할 선택 & 위임 프로세스 ---
+    // --- 4. 역할 선택 ---
     function selectRole(type) {
         if(type === 'me') {
             document.getElementById('list-header-text').innerHTML = "김민준님,<br>무엇을 도와드릴까요?";
@@ -349,15 +381,9 @@
     function requestFamilyConsent() {
         const familyName = document.getElementById('family-name').value;
         showLoading("카카오톡 전송 중...", familyName + "님께 동의 요청을 보냈습니다.");
-        
         setTimeout(() => {
             hideLoading();
-            // 커스텀 알림창 호출
-            showCustomAlert(
-                "승인 완료", 
-                "✅ <b>" + familyName + "</b>님이 대리 신청을<br>승인하셨습니다.", 
-                familyName
-            );
+            showCustomAlert("승인 완료", "✅ <b>" + familyName + "</b>님이 대리 신청을<br>승인하셨습니다.", familyName);
         }, 2000);
     }
 
