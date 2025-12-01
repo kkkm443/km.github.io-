@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>헤아림 (No Reload Reset)</title>
+    <title>헤아림 (Final Fixed)</title>
     <style>
         /* ====================
            1. 반응형 레이아웃 설정
@@ -295,7 +295,8 @@
         // 4. 선택된 카드들 초기화 (체크 해제)
         document.querySelectorAll('.benefit-card').forEach(c => c.classList.remove('selected'));
 
-        // 5. 어르신 팝업 띄우기 (로딩 없이 바로)
+        // ★ 5. 로고 화면은 숨김 유지, 어르신 팝업만 다시 띄우기 ★
+        document.getElementById('splash-screen').style.display = 'none'; 
         document.getElementById('senior-modal').style.display = 'flex';
     }
 
