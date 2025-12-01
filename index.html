@@ -3,74 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>헤아림 (Rounded Design)</title>
+    <title>헤아림 (Final with Loading)</title>
     <style>
         /* ====================
-           1. 반응형 레이아웃 (둥근 모서리 유지)
+           1. 반응형 레이아웃 설정
            ==================== */
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;  
             display: flex; justify-content: center; align-items: center; 
             min-height: 100vh; margin: 0; user-select: none; 
         }
 
         .app-container { 
-            width: 100%; 
-            height: 100vh; 
-            background-color: white; 
-            position: relative; 
+            width: 100%; height: 100vh; 
+            background-color: white; position: relative; 
             display: flex; flex-direction: column; 
             
-            /* ★ 핵심 수정: 모서리를 항상 둥글게 유지 ★ */
-            max-width: 485px; 
-            max-height: 880px; /* 너무 길어지지 않게 */
-            border-radius: 35px; /* 둥근 정도 (아이폰 스타일) */
-            overflow: hidden; /* 둥근 모서리 밖으로 내용이 나가지 않게 */
-            
-            /* 그림자 효과로 입체감 주기 */
+            /* 둥근 모서리 디자인 */
+            max-width: 485px; max-height: 880px; border-radius: 35px; overflow: hidden; 
             box-shadow: 0 0 30px rgba(0,0,0,0.5); 
         }
 
-        /* 모바일 화면 대응 */
         @media (max-width: 480px) {
-            body { 
-                background-color: #f2f4f6; /* 모바일 배경색 */
-                align-items: flex-start; /* 위쪽 정렬 */
-            }
-            .app-container {
-                max-width: 100%;
-                height: 100vh;
-                max-height: none; /* 높이 제한 해제 */
-                border-radius: 0; /* 모바일 전체 화면에서는 꽉 차게 (선택사항) */
-            }
-            
-            /* ★ 사용자가 원한 '둥근 모서리'를 모바일에서도 강제 적용하려면 아래 주석을 푸세요 ★ */
-            /* .app-container {
-                margin: 10px;
-                height: calc(100vh - 20px);
-                border-radius: 25px;
-                box-shadow: 0 0 15px rgba(0,0,0,0.2);
-            }
-            */
-        }
-        
-        /* 이번에는 요청하신 대로 모바일/PC 상관없이 항상 둥글게 강제 적용합니다 */
-        @media (max-width: 480px) {
-            .app-container {
-                border-radius: 30px !important; /* 강제 적용 */
-                margin: 0; /* 꽉 차게 */
-                /* 만약 화면 테두리와 떨어지게 하려면 margin: 10px; height: 95vh; 로 바꾸세요 */
-            }
+            .app-container { border-radius: 30px !important; margin: 0; }
         }
 
         /* 화면 전환용 클래스 */
         .screen { 
             padding: 20px; flex: 1; display: none; 
             flex-direction: column; overflow-y: auto; padding-bottom: 100px; 
-            
-            /* 스크롤바 숨기기 */
-            scrollbar-width: none; 
-            -ms-overflow-style: none;
+            scrollbar-width: none; -ms-overflow-style: none;
         }
         .screen::-webkit-scrollbar { display: none; }
         .screen.active { display: flex; }
@@ -82,8 +44,7 @@
             background-color: #3182f6; color: white; border: none; padding: 18px; 
             border-radius: 18px; font-size: 18px; font-weight: bold; cursor: pointer; 
             width: 100%; margin-top: auto; margin-bottom: 20px; 
-            box-shadow: 0 4px 10px rgba(49, 130, 246, 0.3); /* 버튼 그림자 추가 */
-            transition: transform 0.1s;
+            box-shadow: 0 4px 10px rgba(49, 130, 246, 0.3); transition: transform 0.1s;
         }
         .big-btn:active { transform: scale(0.98); }
 
@@ -101,7 +62,7 @@
         .logo-img { 
             width: 120px; height: 120px; object-fit: contain; margin-bottom: 20px; 
             animation: pulse-logo 2.5s infinite ease-in-out; 
-            filter: drop-shadow(0 10px 20px rgba(42, 193, 188, 0.3)); /* 그림자 강화 */
+            filter: drop-shadow(0 10px 20px rgba(42, 193, 188, 0.3));
         }
         .logo-text { font-size: 40px; font-weight: 900; color: #2ac1bc; letter-spacing: -2px; margin-top: 5px; }
         @keyframes pulse-logo { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
@@ -112,7 +73,7 @@
         .custom-alert-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.6); z-index: 2000;
-            backdrop-filter: blur(5px); /* 배경 블러 효과 추가 */
+            backdrop-filter: blur(5px);
             display: none; justify-content: center; align-items: center;
         }
         .custom-alert-box {
@@ -127,7 +88,7 @@
         .alert-btn { background-color: #3182f6; color: white; border: none; padding: 16px; border-radius: 15px; font-size: 17px; font-weight: bold; width: 100%; cursor: pointer; }
 
         /* ====================
-           4. 어르신 팝업 & UI 요소
+           4. UI 컴포넌트
            ==================== */
         .senior-modal { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
@@ -321,7 +282,7 @@
         setTimeout(() => { splash.style.display = 'none'; seniorModal.style.display = 'flex'; }, 3700);
     }
 
-    // --- 앱 리셋 (새로고침 없이) ---
+    // --- 앱 리셋 ---
     function resetApp() {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById('voice-bar').classList.remove('active');
@@ -331,7 +292,6 @@
         document.getElementById('list-header-text').innerHTML = "김민준님,<br>무엇을 도와드릴까요?";
         document.querySelectorAll('.benefit-card').forEach(c => c.classList.remove('selected'));
         
-        // 로고 로딩 없이 바로 어르신 팝업 띄우기
         document.getElementById('splash-screen').style.display = 'none';
         document.getElementById('senior-modal').style.display = 'flex';
     }
@@ -414,14 +374,24 @@
         }
     }
 
-    // --- 6. 흐름 제어 ---
+    // --- 6. 흐름 제어 (로딩 추가됨) ---
     function checkFlow() {
         const selectedCards = document.querySelectorAll('.benefit-card.selected');
         let needFile = false;
         selectedCards.forEach(card => { if(card.getAttribute('data-need-file') === 'true') needFile = true; });
+        
         document.getElementById('voice-bar').classList.remove('active');
-        if(needFile) { showScreen('screen-input'); } 
-        else { showScreen('screen-success'); }
+
+        if(needFile) { 
+            showScreen('screen-input'); 
+        } else { 
+            // ★ 수정됨: 서류 없는 일반 신청도 로딩 후 완료 처리 ★
+            showLoading("신청서 접수 중...", "정부24 및 지자체 서버로<br>데이터를 전송하고 있습니다.");
+            setTimeout(() => {
+                hideLoading();
+                showScreen('screen-success'); 
+            }, 2000);
+        }
     }
 
     // --- 7. 서류 제출 ---
@@ -441,7 +411,7 @@
     }
     function showLoading(title, desc) {
         document.getElementById('loading-text').innerText = title;
-        document.getElementById('loading-desc').innerText = desc;
+        document.getElementById('loading-desc').innerHTML = desc; // HTML 태그 허용
         document.getElementById('loading-overlay').style.display = 'flex';
     }
     function hideLoading() { document.getElementById('loading-overlay').style.display = 'none'; }
