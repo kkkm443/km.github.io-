@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>헤아림 (Design Fix)</title>
+    <title>헤아림 (Camera Loading Fixed)</title>
     <style>
         /* ====================
-           1. 반응형 레이아웃
+           1. 반응형 레이아웃 설정
            ==================== */
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
@@ -135,10 +135,9 @@
         .manual-bar { position: absolute; bottom: 0; left: 0; width: 100%; background: white; padding: 25px 20px; box-shadow: 0 -5px 30px rgba(0,0,0,0.1); box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; z-index: 50; border-radius: 30px 30px 0 0; }
         .manual-btn { background: #333; color: white; border: none; padding: 15px 30px; border-radius: 15px; font-weight: bold; font-size: 17px; cursor: pointer; }
 
-        /* 음성 비서 바 (수정됨: 높이 증가 및 간격 조정) */
         .voice-bar { 
             position: absolute; bottom: 0; left: 0; width: 100%; 
-            height: 350px; /* 높이 300 -> 350px로 증가 */
+            height: 350px; 
             background: white; border-top-left-radius: 35px; border-top-right-radius: 35px; 
             box-shadow: 0 -5px 40px rgba(0,0,0,0.2); z-index: 100; 
             display: none; flex-direction: column; align-items: center; 
@@ -148,18 +147,8 @@
         }
         .voice-bar.active { display: flex; transform: translateY(0); }
         
-        /* 음성 텍스트 (간격 수정) */
-        .voice-header-text {
-            font-size: 16px; color: #2ac1bc; font-weight: bold; 
-            margin-bottom: 30px; /* 글자와 파형 사이 간격 넓힘 */
-        }
-
-        .voice-transcript { 
-            font-size: 22px; color: #333; font-weight: 800; 
-            margin-bottom: 20px; text-align: center; padding: 0 20px; 
-            height: 70px; display: flex; align-items: center; justify-content: center; 
-            line-height: 1.3; 
-        }
+        .voice-header-text { font-size: 16px; color: #2ac1bc; font-weight: bold; margin-bottom: 30px; }
+        .voice-transcript { font-size: 22px; color: #333; font-weight: 800; margin-bottom: 20px; text-align: center; padding: 0 20px; height: 70px; display: flex; align-items: center; justify-content: center; line-height: 1.3; }
         
         .wave-container { display: flex; height: 50px; align-items: center; margin-bottom: 20px; }
         .bar { width: 8px; background: #2ac1bc; margin: 0 5px; border-radius: 4px; animation: sound 1s infinite ease-in-out; }
@@ -421,9 +410,10 @@
         }
     }
 
-    // --- 7. 서류 제출 (단계별 리얼 로딩) ---
+    // --- 7. 서류 제출 (단계별 리얼 로딩 - 수정됨) ---
     function processDoc(type) {
         if(type === 'auto') { 
+            // 자동 발급
             showLoading("서류 발급 중...", "행정안전부 서버에서<br>가족관계증명서를 가져옵니다.");
             setTimeout(() => {
                 document.getElementById('loading-text').innerText = "신청서 제출 중...";
@@ -434,8 +424,20 @@
                 }, 2000);
             }, 2000);
         } else { 
-            showLoading("카메라 구동 중...", "사진을 촬영하고 있습니다."); 
-            setTimeout(() => { hideLoading(); showScreen('screen-success'); }, 2000);
+            // ★ 카메라 모드: 2단계 로딩 적용 ★
+            // 1단계: 카메라 켜는 척
+            showLoading("카메라 구동 중...", "촬영 모드로 전환합니다.");
+            
+            setTimeout(() => {
+                // 2단계: 찍은 사진 분석하는 척
+                document.getElementById('loading-text').innerText = "신청서 제출 중...";
+                document.getElementById('loading-desc').innerHTML = "촬영된 서류를<br>지자체로 전송하고 있습니다.";
+                
+                setTimeout(() => {
+                    hideLoading();
+                    showScreen('screen-success'); 
+                }, 3000); // 3초 뒤 완료
+            }, 1500); // 1.5초 뒤 2단계로
         }
     }
 
